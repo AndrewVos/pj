@@ -8,22 +8,14 @@ struct Service {
 	start  bool
 }
 
-pub fn retrieve_services(document toml.Doc) []Service {
-	mut services := []Service{}
-
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'service' {
-			for key, value in top_level_value.as_map() {
-				services << Service{
-					name: value.value('name').string()
-					enable: value.value('enable').bool()
-					start: value.value('start').bool()
-				}
-			}
+pub fn retrieve_services(document toml.Any) []Service {
+	return document.array().map(fn (v toml.Any) Service {
+		return Service{
+			name: v.value('name').string()
+			enable: v.value('enable').bool()
+			start: v.value('start').bool()
 		}
-	}
-
-	return services
+	})
 }
 
 pub fn (services []Service) execute() {

@@ -7,20 +7,12 @@ struct Package {
 	names []string
 }
 
-pub fn retrieve_packages(document toml.Doc) []Package {
-	mut packages := []Package{}
-
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'package' {
-			for key, value in top_level_value.as_map() {
-				packages << Package{
-					names: value.value('name').array().as_strings()
-				}
-			}
+pub fn retrieve_packages(document toml.Any) []Package {
+	return document.array().map(fn (v toml.Any) Package {
+		return Package{
+			names: v.value('name').array().as_strings()
 		}
-	}
-
-	return packages
+	})
 }
 
 fn (packages []Package) missing() []string {

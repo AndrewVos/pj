@@ -51,21 +51,14 @@ pub fn (symlinks []Symlink) execute() {
 	}
 }
 
-pub fn retrieve_symlinks(module_name string, document toml.Doc) []Symlink {
-	mut symlinks := []Symlink{}
-
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'symlink' {
-			for key, value in top_level_value.as_map() {
-				symlinks << Symlink{
-					module_name: module_name
-					become: value.value('become').default_to(false).bool()
-					from: value.value('from').string()
-					to: value.value('to').string()
-				}
-			}
+pub fn retrieve_symlinks(module_name string, document toml.Any) []Symlink {
+	closure_map := fn [module_name] (v toml.Any) Symlink {
+		return Symlink{
+			module_name: module_name
+			become: v.value('become').default_to(false).bool()
+			from: v.value('from').string()
+			to: v.value('to').string()
 		}
 	}
-
-	return symlinks
+	return document.array().map(closure_map)
 }

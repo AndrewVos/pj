@@ -7,22 +7,15 @@ struct Line {
 	line string
 }
 
-pub fn retrieve_lines(document toml.Doc) []Line {
-	mut lines := []Line{}
-
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'line' {
-			for line in top_level_value.array() {
-				lines << Line{
-					path: line.value('path').string()
-					line: line.value('line').string()
-				}
-			}
+pub fn retrieve_lines(document toml.Any) []Line {
+	return document.array().map(fn (v toml.Any) Line {
+		return Line{
+			path: v.value('path').string()
+			line: v.value('line').string()
 		}
-	}
-
-	return lines
+	})
 }
 
 pub fn (lines []Line) execute() {
+	println('not supported')
 }

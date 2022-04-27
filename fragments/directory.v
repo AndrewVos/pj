@@ -21,18 +21,10 @@ pub fn (directories []Directory) execute() {
 	}
 }
 
-pub fn retrieve_directories(document toml.Doc) []Directory {
-	mut directories := []Directory{}
-
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'directory' {
-			for key, value in top_level_value.as_map() {
-				directories << Directory{
-					path: value.value('path').string()
-				}
-			}
+pub fn retrieve_directories(document toml.Any) []Directory {
+	return document.array().map(fn (v toml.Any) Directory {
+		return Directory{
+			path: v.value('path').string()
 		}
-	}
-
-	return directories
+	})
 }

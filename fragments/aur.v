@@ -7,16 +7,12 @@ struct Aur {
 	names []string
 }
 
-pub fn retrieve_aur_packages(document toml.Doc) []Aur {
+pub fn retrieve_aur_packages(document toml.Any) []Aur {
 	mut aur_packages := []Aur{}
 
-	for top_level_key, top_level_value in document.to_any().as_map() {
-		if top_level_key == 'aur' {
-			for aur_package in top_level_value.array() {
-				aur_packages << Aur{
-					names: aur_package.value('name').array().as_strings()
-				}
-			}
+	for aur_package in document.array() {
+		aur_packages << Aur{
+			names: aur_package.value('name').array().as_strings()
 		}
 	}
 

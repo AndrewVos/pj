@@ -21,15 +21,27 @@ fn main() {
 		contents := os.read_file(os.join_path(module_path, 'configuration.toml')) or { panic(err) }
 		document := toml.parse_text(contents) or { panic(err) }
 
-		packages << fragments.retrieve_packages(document)
-		aur << fragments.retrieve_aur_packages(document)
-		symlinks << fragments.retrieve_symlinks(module_name, document)
-		directories << fragments.retrieve_directories(document)
-		repositories << fragments.retrieve_repositories(document)
-		services << fragments.retrieve_services(document)
-		scripts << fragments.retrieve_scripts(document)
-		groups << fragments.retrieve_groups(document)
-		lines << fragments.retrieve_lines(document)
+		for key, value in document.to_any().as_map() {
+			if key == 'package' {
+				packages << fragments.retrieve_packages(value)
+			} else if key == 'aur' {
+				aur << fragments.retrieve_aur_packages(value)
+			} else if key == 'symlink' {
+				symlinks << fragments.retrieve_symlinks(module_name, value)
+			} else if key == 'directory' {
+				directories << fragments.retrieve_directories(value)
+			} else if key == 'repository' {
+				repositories << fragments.retrieve_repositories(value)
+			} else if key == 'service' {
+				services << fragments.retrieve_services(value)
+			} else if key == 'script' {
+				scripts << fragments.retrieve_scripts(value)
+			} else if key == 'group' {
+				groups << fragments.retrieve_groups(value)
+			} else if key == 'line' {
+				lines << fragments.retrieve_lines(value)
+			}
+		}
 	}
 
 	packages.execute()
