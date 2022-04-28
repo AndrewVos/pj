@@ -38,6 +38,7 @@ type Shell struct {
 }
 
 type Fragment struct {
+	Path    string
 	Pacman  Pacman
 	Aur     Aur
 	Symlink []Symlink
@@ -45,8 +46,20 @@ type Fragment struct {
 	Shell   Shell
 }
 
+type Configuration struct {
+	Fragments []Fragment
+}
+
+func (configuration Configuration) execute() {
+	for _, fragment := range configuration.Fragments {
+		fmt.Println(fragment.Path)
+	}
+}
+
 func main() {
 	module_paths, err := filepath.Glob("../../.dotfiles/fragments/*")
+
+	configuration := Configuration{}
 
 	if err != nil {
 		log.Fatalf("error: %v", err)
@@ -54,18 +67,20 @@ func main() {
 
 	for _, module_path := range module_paths {
 		configuration_path := path.Join(module_path, "configuration.yml")
-		fmt.Println(configuration_path)
 
 		contents, err := readFile(configuration_path)
 		if err != nil {
 			log.Fatalf("error: %v", err)
 		}
 
-		fragment := Fragment{}
+		fragment := Fragment{Path: module_path}
 		err = yaml.Unmarshal([]byte(contents), &fragment)
 		if err != nil {
 			log.Fatalf("error: %v", err)
 		}
-		fmt.Printf("--- t:\n%+v\n\n", fragment)
+
+		configuration.Fragments = append(configuration.Fragments, fragment)
 	}
+
+	fmt.Printf("--- t:\n%+v\n\n", configuration)
 }
