@@ -1,4 +1,4 @@
-package main
+package types
 
 import "errors"
 import "fmt"
@@ -26,7 +26,7 @@ type Fragment struct {
 	Group     []modules.Group
 }
 
-func (configuration Configuration) execute() error {
+func (configuration Configuration) Apply() error {
 	err := configuration.executePacman()
 	if err != nil {
 		return err
