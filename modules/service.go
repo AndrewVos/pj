@@ -1,12 +1,47 @@
 package modules
 
-import "os"
-import "os/exec"
+import (
+	"fmt"
+	"os"
+	"os/exec"
+)
 
 type Service struct {
 	Name   string
 	Enable bool
 	Start  bool
+}
+
+func (s Service) Apply() error {
+	if s.Enable {
+		enabled, err := s.IsEnabled()
+		if err != nil {
+			return err
+		}
+		if !enabled {
+			fmt.Println("Enabling service \"" + s.Name + "\"")
+			err := s.EnableService()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if s.Start {
+		active, err := s.IsStarted()
+		if err != nil {
+			return err
+		}
+		if !active {
+			fmt.Println("Starting service \"" + s.Name + "\"")
+			err := s.StartService()
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s Service) IsStarted() (bool, error) {

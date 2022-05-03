@@ -1,12 +1,36 @@
 package modules
 
-import "os"
-import "os/user"
-import "os/exec"
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"os/user"
+)
 
 type Group struct {
 	User string
 	Name string
+}
+
+func (g Group) Apply() error {
+	usr, err := user.Lookup(g.User)
+
+	if err != nil {
+		return err
+	}
+
+	userInGroup, err := g.IsUserInGroup(usr)
+
+	if err != nil {
+		return err
+	}
+
+	if !userInGroup {
+		fmt.Println("Adding user \"" + g.User + "\"to group \"" + g.Name + "\"")
+		return g.AddToUser(usr)
+	}
+
+	return nil
 }
 
 func (g Group) IsUserInGroup(usr *user.User) (bool, error) {
