@@ -57,22 +57,8 @@ func apply() error {
 			return err
 		}
 
-		for _, topLevelMod := range document {
-			if module, ok := topLevelMod["pacman"]; ok {
-				applyables = append(applyables, retrievePacman(module))
-			} else if module, ok := topLevelMod["aur"]; ok {
-				applyables = append(applyables, retrieveAur(module))
-			} else if module, ok := topLevelMod["symlink"]; ok {
-				applyables = append(applyables, retrieveSymlink(modulePath, module))
-			} else if module, ok := topLevelMod["group"]; ok {
-				applyables = append(applyables, retrieveGroup(module))
-			} else if module, ok := topLevelMod["script"]; ok {
-				applyables = append(applyables, retrieveScript(module))
-			} else if module, ok := topLevelMod["service"]; ok {
-				applyables = append(applyables, retrieveService(module))
-			} else if module, ok := topLevelMod["directory"]; ok {
-				applyables = append(applyables, retrieveDirectory(module))
-			}
+		for _, topLevelModule := range document {
+			applyables = append(applyables, buildModule(modulePath, topLevelModule))
 		}
 	}
 
@@ -88,6 +74,26 @@ func apply() error {
 	}
 
 	return err
+}
+
+func buildModule(modulePath string, topLevelModule map[string]map[string]interface{}) modules.Applyable {
+	if module, ok := topLevelModule["pacman"]; ok {
+		return retrievePacman(module)
+	} else if module, ok := topLevelModule["aur"]; ok {
+		return retrieveAur(module)
+	} else if module, ok := topLevelModule["symlink"]; ok {
+		return retrieveSymlink(modulePath, module)
+	} else if module, ok := topLevelModule["group"]; ok {
+		return retrieveGroup(module)
+	} else if module, ok := topLevelModule["script"]; ok {
+		return retrieveScript(module)
+	} else if module, ok := topLevelModule["service"]; ok {
+		return retrieveService(module)
+	} else if module, ok := topLevelModule["directory"]; ok {
+		return retrieveDirectory(module)
+	}
+
+	return nil
 }
 
 func retrievePacman(module map[string]interface{}) modules.Pacman {
