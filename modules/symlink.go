@@ -15,8 +15,6 @@ type Symlink struct {
 	Sudo       bool
 	From       string
 	To         string
-	fullFrom   string
-	fullTo     string
 }
 
 func (s Symlink) Apply() error {
