@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/AndrewVos/pj/modules"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/spf13/cobra"
@@ -76,6 +77,10 @@ func apply() error {
 	}
 
 	for _, applyable := range applyables {
+		if Verbose {
+			fmt.Printf("%+v\n", applyable)
+		}
+
 		err = applyable.Apply()
 		if err != nil {
 			return err
