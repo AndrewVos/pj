@@ -1,10 +1,12 @@
 package utils
 
-import "os"
-import "os/user"
-import "strings"
-import "path/filepath"
-import "errors"
+import (
+	"errors"
+	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
+)
 
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
@@ -34,12 +36,16 @@ func IsSymlinked(from string, to string) bool {
 	return destination == to
 }
 
-func IsDirectory(path string) (bool, error) {
+func DirectoryExists(path string) (bool, error) {
 	fileInfo, err := os.Stat(path)
 
-	if err != nil {
-		return false, err
+	if errors.Is(err, os.ErrExist) {
+		return fileInfo.IsDir(), nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else if err == nil {
+		return fileInfo.IsDir(), nil
 	}
 
-	return fileInfo.IsDir(), err
+	return false, err
 }

@@ -13,7 +13,7 @@ type Directory struct {
 func (d Directory) Apply() error {
 	fullPath := utils.ExpandTilde(d.Path)
 
-	isDirectory, err := utils.IsDirectory(fullPath)
+	isDirectory, err := utils.DirectoryExists(fullPath)
 	if err != nil {
 		return err
 	}

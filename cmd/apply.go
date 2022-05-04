@@ -190,7 +190,7 @@ func retrieveService(module map[string]interface{}) modules.Service {
 func retrieveDirectory(module map[string]interface{}) modules.Directory {
 	directory := modules.Directory{}
 
-	if value, ok := module["Path"].(string); ok {
+	if value, ok := module["path"].(string); ok {
 		directory.Path = value
 	}
 
