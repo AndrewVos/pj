@@ -1,13 +1,15 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/AndrewVos/pj/modules"
 	"github.com/AndrewVos/pj/utils"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -41,9 +43,17 @@ func apply() error {
 		return err
 	}
 
-	applyables := []modules.Applyable{}
+	type Module struct {
+		Name       string
+		Applyables []modules.Applyable
+	}
+
+	modules := []Module{}
+	applyableCount := 0
 
 	for _, modulePath := range modulePaths {
+		m := Module{Name: path.Base(modulePath)}
+
 		configurationPath := filepath.Join(modulePath, "configuration.yml")
 
 		contents, err := utils.ReadFile(configurationPath)
@@ -58,18 +68,36 @@ func apply() error {
 		}
 
 		for _, topLevelModule := range document {
-			applyables = append(applyables, buildModule(modulePath, topLevelModule))
+			m.Applyables = append(m.Applyables, buildModule(modulePath, topLevelModule))
+			applyableCount += 1
 		}
+
+		modules = append(modules, m)
 	}
 
-	for _, applyable := range applyables {
-		if Verbose {
-			fmt.Printf("%+v\n", applyable)
-		}
+	bar := progressbar.NewOptions(
+		applyableCount,
+		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionSetWidth(15),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
 
-		err = applyable.Apply()
-		if err != nil {
-			return err
+	for _, m := range modules {
+		bar.Describe(m.Name)
+		for _, applyable := range m.Applyables {
+			err = applyable.Apply()
+			if err != nil {
+				return err
+			}
+
+			bar.Add(1)
 		}
 	}
 
