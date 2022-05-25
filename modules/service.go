@@ -8,6 +8,7 @@ import (
 
 type Service struct {
 	Name   string
+	User   bool
 	Enable bool
 	Start  bool
 }
@@ -46,6 +47,9 @@ func (s Service) Apply() error {
 
 func (s Service) IsStarted() (bool, error) {
 	cmd := exec.Command("systemctl", "is-active", "--quiet", s.Name)
+	if s.User {
+		cmd = exec.Command("systemctl", "--user", "is-active", "--quiet", s.Name)
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -62,6 +66,9 @@ func (s Service) IsStarted() (bool, error) {
 
 func (s Service) IsEnabled() (bool, error) {
 	cmd := exec.Command("systemctl", "is-enabled", "--quiet", s.Name)
+	if s.User {
+		cmd = exec.Command("systemctl", "--user", "is-enabled", "--quiet", s.Name)
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -78,6 +85,9 @@ func (s Service) IsEnabled() (bool, error) {
 
 func (s Service) StartService() error {
 	cmd := exec.Command("sudo", "systemctl", "start", s.Name)
+	if s.User {
+		cmd = exec.Command("systemctl", "--user", "start", s.Name)
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -87,6 +97,9 @@ func (s Service) StartService() error {
 
 func (s Service) EnableService() error {
 	cmd := exec.Command("sudo", "systemctl", "enable", s.Name)
+	if s.User {
+		cmd = exec.Command("systemctl", "--user", "enable", s.Name)
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

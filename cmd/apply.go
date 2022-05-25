@@ -216,6 +216,10 @@ func retrieveService(module map[string]interface{}) modules.Service {
 		service.Name = value
 	}
 
+	if value, ok := module["user"].(bool); ok {
+		service.User = value
+	}
+
 	if value, ok := module["enable"].(bool); ok {
 		service.Enable = value
 	}
