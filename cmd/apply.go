@@ -229,6 +229,10 @@ func retrieveService(module map[string]interface{}) modules.Service {
 func retrieveDirectory(module map[string]interface{}) modules.Directory {
 	directory := modules.Directory{}
 
+	if value, ok := module["sudo"].(bool); ok {
+		directory.Sudo = value
+	}
+
 	if value, ok := module["path"].(string); ok {
 		directory.Path = value
 	}

@@ -7,6 +7,7 @@ import (
 )
 
 type Directory struct {
+	Sudo bool
 	Path string
 }
 
@@ -20,6 +21,10 @@ func (d Directory) Apply() error {
 
 	if !isDirectory {
 		cmd := exec.Command("mkdir", fullPath)
+		if d.Sudo {
+			cmd = exec.Command("sudo", "mkdir", fullPath)
+		}
+
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
