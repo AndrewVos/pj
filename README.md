@@ -4,8 +4,6 @@
 
 Configuration management for localhost
 
-WARNING: only works with Arch Linux for now.
-
 ## What is this?
 
 When you run ```pj apply``` we sync your configuration to your system,
