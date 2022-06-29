@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/AndrewVos/pj/modules"
+	"github.com/AndrewVos/pj/applyables"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/k0kubun/go-ansi"
 	"github.com/mitchellh/mapstructure"
@@ -46,7 +46,7 @@ func apply() error {
 
 	type Module struct {
 		Name       string
-		Applyables []modules.Applyable
+		Applyables []applyables.Applyable
 	}
 
 	modules := []Module{}
@@ -109,43 +109,43 @@ func apply() error {
 	return err
 }
 
-func decodeApplyable(modulePath string, topLevelModule map[string]map[string]interface{}) (modules.Applyable, error) {
+func decodeApplyable(modulePath string, topLevelModule map[string]map[string]interface{}) (applyables.Applyable, error) {
 	if data, ok := topLevelModule["directory"]; ok {
-		var applyable modules.Directory
+		var applyable applyables.Directory
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["symlink"]; ok {
-		applyable := modules.Symlink{ModulePath: modulePath}
+		applyable := applyables.Symlink{ModulePath: modulePath}
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["group"]; ok {
-		var applyable modules.Group
+		var applyable applyables.Group
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["script"]; ok {
-		var applyable modules.Script
+		var applyable applyables.Script
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["service"]; ok {
-		var applyable modules.Service
+		var applyable applyables.Service
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["pacman"]; ok {
-		var applyable modules.Pacman
+		var applyable applyables.Pacman
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["aur"]; ok {
-		var applyable modules.Aur
+		var applyable applyables.Aur
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["brew"]; ok {
-		var applyable modules.Brew
+		var applyable applyables.Brew
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}

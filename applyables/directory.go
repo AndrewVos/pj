@@ -1,4 +1,4 @@
-package modules
+package applyables
 
 import (
 	"github.com/AndrewVos/pj/utils"
