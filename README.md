@@ -57,6 +57,7 @@ For more examples [take a look at my personal dotfiles repo](https://github.com/
 ## Usage
 
 ```
+pj create-module my-module
 pj apply
 ```
 
@@ -128,7 +129,7 @@ Create a directory:
     path: "~/.my-directory"
 ```
 
-Create a directory with `sudo`:
+Create a directory with sudo:
 
 ```yaml
 - directory:
