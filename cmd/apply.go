@@ -1,11 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/AndrewVos/pj/applyables"
 	"github.com/AndrewVos/pj/utils"
-	"github.com/k0kubun/go-ansi"
 	"github.com/mitchellh/mapstructure"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"log"
@@ -80,29 +79,15 @@ func apply() error {
 		modules = append(modules, m)
 	}
 
-	bar := progressbar.NewOptions(
-		applyableCount,
-		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionShowBytes(true),
-		progressbar.OptionSetWidth(15),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "[green]=[reset]",
-			SaucerHead:    "[green]>[reset]",
-			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
-		}))
-
 	for _, m := range modules {
-		bar.Describe(m.Name)
+		if Verbose {
+			fmt.Printf("Applying module %s...\n", m.Name)
+		}
 		for _, applyable := range m.Applyables {
 			err = applyable.Apply()
 			if err != nil {
 				return err
 			}
-
-			bar.Add(1)
 		}
 	}
 
