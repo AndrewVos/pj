@@ -109,6 +109,8 @@ func buildModule(modulePath string, topLevelModule map[string]map[string]interfa
 		return retrievePacman(module)
 	} else if module, ok := topLevelModule["aur"]; ok {
 		return retrieveAur(module)
+	} else if module, ok := topLevelModule["brew"]; ok {
+		return retrieveBrew(module)
 	} else if module, ok := topLevelModule["symlink"]; ok {
 		return retrieveSymlink(modulePath, module)
 	} else if module, ok := topLevelModule["group"]; ok {
@@ -242,4 +244,23 @@ func retrieveDirectory(module map[string]interface{}) modules.Directory {
 	}
 
 	return directory
+}
+
+func retrieveBrew(module map[string]interface{}) modules.Brew {
+	brew := modules.Brew{}
+
+	if value, ok := module["name"]; ok {
+		if name, ok := value.(string); ok {
+			brew.Name = []string{name}
+		} else if nameValues, ok := value.([]interface{}); ok {
+			names := []string{}
+			for _, nameValue := range nameValues {
+				if name, ok := nameValue.(string); ok {
+					names = append(names, name)
+				}
+			}
+			brew.Name = names
+		}
+	}
+	return brew
 }

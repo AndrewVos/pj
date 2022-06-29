@@ -103,6 +103,24 @@ Install multiple packages:
       - slack-desktop
 ```
 
+### Brew packages
+
+Install a single package:
+
+```yaml
+- brew:
+    name: postgresql
+```
+
+Install multiple packages:
+
+```yaml
+- aur:
+    name:
+      - postgresql
+      - chrome
+```
+
 ### Directory
 
 Create a directory:
