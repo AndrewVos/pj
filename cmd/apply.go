@@ -4,6 +4,7 @@ import (
 	"github.com/AndrewVos/pj/modules"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/k0kubun/go-ansi"
+	"github.com/mitchellh/mapstructure"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -68,7 +69,11 @@ func apply() error {
 		}
 
 		for _, topLevelModule := range document {
-			m.Applyables = append(m.Applyables, buildModule(modulePath, topLevelModule))
+			applyable, err := decodeApplyable(modulePath, topLevelModule)
+			if err != nil {
+				return err
+			}
+			m.Applyables = append(m.Applyables, applyable)
 			applyableCount += 1
 		}
 
@@ -104,163 +109,49 @@ func apply() error {
 	return err
 }
 
-func buildModule(modulePath string, topLevelModule map[string]map[string]interface{}) modules.Applyable {
-	if module, ok := topLevelModule["pacman"]; ok {
-		return retrievePacman(module)
-	} else if module, ok := topLevelModule["aur"]; ok {
-		return retrieveAur(module)
-	} else if module, ok := topLevelModule["brew"]; ok {
-		return retrieveBrew(module)
-	} else if module, ok := topLevelModule["symlink"]; ok {
-		return retrieveSymlink(modulePath, module)
-	} else if module, ok := topLevelModule["group"]; ok {
-		return retrieveGroup(module)
-	} else if module, ok := topLevelModule["script"]; ok {
-		return retrieveScript(module)
-	} else if module, ok := topLevelModule["service"]; ok {
-		return retrieveService(module)
-	} else if module, ok := topLevelModule["directory"]; ok {
-		return retrieveDirectory(module)
-	}
-
-	return nil
-}
-
-func retrievePacman(module map[string]interface{}) modules.Pacman {
-	pacman := modules.Pacman{}
-
-	if value, ok := module["name"]; ok {
-		if name, ok := value.(string); ok {
-			pacman.Name = []string{name}
-		} else if nameValues, ok := value.([]interface{}); ok {
-			names := []string{}
-			for _, nameValue := range nameValues {
-				if name, ok := nameValue.(string); ok {
-					names = append(names, name)
-				}
-			}
-			pacman.Name = names
+func decodeApplyable(modulePath string, topLevelModule map[string]map[string]interface{}) (modules.Applyable, error) {
+	if data, ok := topLevelModule["directory"]; ok {
+		var applyable modules.Directory
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["symlink"]; ok {
+		applyable := modules.Symlink{ModulePath: modulePath}
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["group"]; ok {
+		var applyable modules.Group
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["script"]; ok {
+		var applyable modules.Script
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["service"]; ok {
+		var applyable modules.Service
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["pacman"]; ok {
+		var applyable modules.Pacman
+		if name, ok := data["name"].(string); ok {
+			data["name"] = []string{name}
 		}
-	}
-	return pacman
-}
-
-func retrieveAur(module map[string]interface{}) modules.Aur {
-	aur := modules.Aur{}
-
-	if value, ok := module["name"]; ok {
-		if name, ok := value.(string); ok {
-			aur.Name = []string{name}
-		} else if nameValues, ok := value.([]interface{}); ok {
-			names := []string{}
-			for _, nameValue := range nameValues {
-				if name, ok := nameValue.(string); ok {
-					names = append(names, name)
-				}
-			}
-			aur.Name = names
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["aur"]; ok {
+		var applyable modules.Aur
+		if name, ok := data["name"].(string); ok {
+			data["name"] = []string{name}
 		}
-	}
-	return aur
-}
-
-func retrieveSymlink(modulePath string, module map[string]interface{}) modules.Symlink {
-	symlink := modules.Symlink{ModulePath: modulePath}
-
-	if value, ok := module["sudo"]; ok {
-		if sudo, ok := value.(bool); ok {
-			symlink.Sudo = sudo
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
+	} else if data, ok := topLevelModule["brew"]; ok {
+		var applyable modules.Brew
+		if name, ok := data["name"].(string); ok {
+			data["name"] = []string{name}
 		}
+		err := mapstructure.Decode(data, &applyable)
+		return applyable, err
 	}
 
-	if value, ok := module["from"]; ok {
-		if from, ok := value.(string); ok {
-			symlink.From = from
-		}
-	}
-
-	if value, ok := module["to"]; ok {
-		if to, ok := value.(string); ok {
-			symlink.To = to
-		}
-	}
-
-	return symlink
-}
-
-func retrieveGroup(module map[string]interface{}) modules.Group {
-	group := modules.Group{}
-
-	if value, ok := module["user"].(string); ok {
-		group.User = value
-	}
-	if value, ok := module["name"].(string); ok {
-		group.Name = value
-	}
-
-	return group
-}
-
-func retrieveScript(module map[string]interface{}) modules.Script {
-	script := modules.Script{}
-
-	if value, ok := module["command"].(string); ok {
-		script.Command = value
-	}
-
-	return script
-}
-
-func retrieveService(module map[string]interface{}) modules.Service {
-	service := modules.Service{}
-
-	if value, ok := module["name"].(string); ok {
-		service.Name = value
-	}
-
-	if value, ok := module["user"].(bool); ok {
-		service.User = value
-	}
-
-	if value, ok := module["enable"].(bool); ok {
-		service.Enable = value
-	}
-
-	if value, ok := module["start"].(bool); ok {
-		service.Start = value
-	}
-	return service
-}
-
-func retrieveDirectory(module map[string]interface{}) modules.Directory {
-	directory := modules.Directory{}
-
-	if value, ok := module["sudo"].(bool); ok {
-		directory.Sudo = value
-	}
-
-	if value, ok := module["path"].(string); ok {
-		directory.Path = value
-	}
-
-	return directory
-}
-
-func retrieveBrew(module map[string]interface{}) modules.Brew {
-	brew := modules.Brew{}
-
-	if value, ok := module["name"]; ok {
-		if name, ok := value.(string); ok {
-			brew.Name = []string{name}
-		} else if nameValues, ok := value.([]interface{}); ok {
-			names := []string{}
-			for _, nameValue := range nameValues {
-				if name, ok := nameValue.(string); ok {
-					names = append(names, name)
-				}
-			}
-			brew.Name = names
-		}
-	}
-	return brew
+	return nil, nil
 }
