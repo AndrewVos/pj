@@ -113,7 +113,7 @@ Install a single package:
 Install multiple packages:
 
 ```yaml
-- aur:
+- brew:
     name:
       - postgresql
       - chrome
