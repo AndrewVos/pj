@@ -2,17 +2,94 @@
 
 ![pj](bird.png)
 
-Configuration management for localhost
+> dotfiles configuration management for your machine
 
-## What is this?
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-When you run ```pj apply``` we sync your configuration to your system,
-which means that packages will only get installed once, symlinks will only be created once etc.
+- [About](#about)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Supported objects](#supported-objects)
+  - [Pacman packages](#pacman-packages)
+  - [Arch User Repository packages](#arch-user-repository-packages)
+  - [Brew packages](#brew-packages)
+  - [Directory](#directory)
+  - [Group](#group)
+  - [Script](#script)
+  - [Service](#service)
+  - [Symlink](#symlink)
+- [Shell completions](#shell-completions)
+  - [Fish](#fish)
+  - [Bash](#bash)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## About
+
+`pj` is a tool to help streamline the configuration of your local machine. It
+allows a simple way to:
+
+- Install packages from Homebrew, pacman or AUR
+- Symlink files to your home directory (or any directory!)
+- Start and stop services
+- Run scripts
+- Create folders and files
+
+Everything is controlled by simple YAML configuration inside module folders to
+keep your concerns separate and easy to manage.
+
+The provided `create-module` CLI makes this step a breeze.
+
+Running `py apply` will sync the configuration to your system.
+
+It works just as well for setting up a new machine as it does managing an
+existing one. Just add a new module and run `pj apply` again and the new
+configuration will be applied. Existing configuration will be left as is.
 
 ## Installation
 
+`pj` is installed with `go` but is provided as a single binary:
+
 ```
 go install github.com/AndrewVos/pj@latest
+```
+
+## Quick start
+
+Let's setup Zsh with the [starship](https://starship.rs/) prompt on a new machine:
+
+```
+~/dotfiles
+❯ pj create-module zsh
+Creating /Users/user/dotfiles/modules...
+Creating /Users/user/dotfiles/modules/zsh...
+Creating /Users/user/dotfiles/modules/zsh/files...
+Creating /Users/user/dotfiles/modules/zsh/configuration.yml...
+```
+
+And now add some values to the `configuration.yml`:
+
+```yaml
+# install some required packages first
+- brew:
+    name:
+      - zsh
+      - starship
+
+# create a `zshrc` file and link it to our home dir
+- symlink:
+    from: "~/.zshrc"
+    to: "zshrc"
+
+# add the shell to `/etc/shells` and change to it
+- script:
+    command: |
+      sudo sh -c 'echo "/usr/local/bin/zsh" >> /etc/shells
+      chsh -s /usr/local/bin/zsh'
+      echo 'shell changed to zsh!'
 ```
 
 ## Configuration
