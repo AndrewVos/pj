@@ -11,15 +11,19 @@ import (
 )
 
 type Symlink struct {
-	ModulePath string
+	modulePath string
 	Sudo       bool
 	From       string
 	To         string
 }
 
+func NewSymlink(modulePath string) Symlink {
+	return Symlink{modulePath: modulePath}
+}
+
 func (s Symlink) Apply() error {
 	fullFrom := utils.ExpandTilde(s.From)
-	fullTo, err := filepath.Abs(filepath.Join(s.ModulePath, "files", s.To))
+	fullTo, err := filepath.Abs(filepath.Join(s.modulePath, "files", s.To))
 
 	if err != nil {
 		return err

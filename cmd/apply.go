@@ -100,7 +100,7 @@ func decodeApplyable(modulePath string, topLevelModule map[string]map[string]int
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["symlink"]; ok {
-		applyable := applyables.Symlink{ModulePath: modulePath}
+		applyable := applyables.NewSymlink(modulePath)
 		err := mapstructure.Decode(data, &applyable)
 		return applyable, err
 	} else if data, ok := topLevelModule["group"]; ok {
