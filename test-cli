@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+go build
+
+./pj add-aur       module-name --name package1 --name package2
+./pj add-brew      module-name --name package1 --name package2
+./pj add-pacman    module-name --name package1 --name package2
+./pj add-directory module-name --path /some/path --sudo
+./pj add-group     module-name --user some-user --name group-name
+./pj add-script    module-name --command "ls -a"
+./pj add-service   module-name --name "service-name" --start --enable
+./pj add-symlink   module-name --from "/blah/blah" --to blah
