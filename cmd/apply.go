@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/AndrewVos/pj/applyables"
+	"github.com/AndrewVos/pj/actions"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
@@ -44,12 +44,12 @@ func apply() error {
 	}
 
 	type Module struct {
-		Name       string
-		Applyables []applyables.Applyable
+		Name    string
+		Actions []actions.Action
 	}
 
 	modules := []Module{}
-	applyableCount := 0
+	actionCount := 0
 
 	for _, modulePath := range modulePaths {
 		m := Module{Name: path.Base(modulePath)}
@@ -68,12 +68,12 @@ func apply() error {
 		}
 
 		for _, topLevelModule := range document {
-			applyable, err := decodeApplyable(modulePath, topLevelModule)
+			action, err := decodeAction(modulePath, topLevelModule)
 			if err != nil {
 				return err
 			}
-			m.Applyables = append(m.Applyables, applyable)
-			applyableCount += 1
+			m.Actions = append(m.Actions, action)
+			actionCount += 1
 		}
 
 		modules = append(modules, m)
@@ -83,8 +83,8 @@ func apply() error {
 		if Verbose {
 			fmt.Printf("Applying module %s...\n", m.Name)
 		}
-		for _, applyable := range m.Applyables {
-			err = applyable.Apply()
+		for _, action := range m.Actions {
+			err = action.Apply()
 			if err != nil {
 				return err
 			}
@@ -94,48 +94,48 @@ func apply() error {
 	return err
 }
 
-func decodeApplyable(modulePath string, topLevelModule map[string]map[string]interface{}) (applyables.Applyable, error) {
+func decodeAction(modulePath string, topLevelModule map[string]map[string]interface{}) (actions.Action, error) {
 	if data, ok := topLevelModule["directory"]; ok {
-		var applyable applyables.Directory
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		var action actions.Directory
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["symlink"]; ok {
-		applyable := applyables.NewSymlink(modulePath)
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		action := actions.NewSymlink(modulePath)
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["group"]; ok {
-		var applyable applyables.Group
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		var action actions.Group
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["script"]; ok {
-		var applyable applyables.Script
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		var action actions.Script
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["service"]; ok {
-		var applyable applyables.Service
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		var action actions.Service
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["pacman"]; ok {
-		var applyable applyables.Pacman
+		var action actions.Pacman
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["aur"]; ok {
-		var applyable applyables.Aur
+		var action actions.Aur
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	} else if data, ok := topLevelModule["brew"]; ok {
-		var applyable applyables.Brew
+		var action actions.Brew
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &applyable)
-		return applyable, err
+		err := mapstructure.Decode(data, &action)
+		return action, err
 	}
 
 	return nil, nil

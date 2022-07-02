@@ -1,4 +1,4 @@
-package applyables
+package actions
 
 import (
 	"github.com/AndrewVos/pj/utils"

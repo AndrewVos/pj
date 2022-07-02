@@ -1,4 +1,4 @@
-package applyables
+package actions
 
 import (
 	"github.com/AndrewVos/pj/utils"
@@ -7,26 +7,26 @@ import (
 	"os/exec"
 )
 
-type Brew struct {
+type Aur struct {
 	Name []string
 }
 
-func (p Brew) Apply() error {
+func (a Aur) Apply() error {
 	missing := []string{}
+	installed, err := utils.ListInstalledPackages()
 
-	installed, err := utils.ListInstalledBrews()
 	if err != nil {
 		return err
 	}
 
-	for _, pkg := range p.Name {
+	for _, pkg := range a.Name {
 		if !slices.Contains(installed, pkg) {
 			missing = append(missing, pkg)
 		}
 	}
 
 	if len(missing) > 0 {
-		cmd := exec.Command("brew", append([]string{"install"}, missing...)...)
+		cmd := exec.Command("yay", append([]string{"-S"}, missing...)...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

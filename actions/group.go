@@ -1,4 +1,4 @@
-package applyables
+package actions
 
 import (
 	"fmt"

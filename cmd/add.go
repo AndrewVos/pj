@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/AndrewVos/pj/applyables"
+	"github.com/AndrewVos/pj/actions"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -13,11 +13,11 @@ import (
 	"strings"
 )
 
-func buildCommand(applyableInfo CommandInfo) {
-	value := reflect.Indirect(reflect.ValueOf(applyableInfo.Applyable))
+func buildCommand(actionInfo CommandInfo) {
+	value := reflect.Indirect(reflect.ValueOf(actionInfo.Action))
 	var command = &cobra.Command{
-		Use:   "add-" + applyableInfo.Name + " <module_name>",
-		Short: applyableInfo.Description,
+		Use:   "add-" + actionInfo.Name + " <module_name>",
+		Short: actionInfo.Description,
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			data := map[string]interface{}{}
@@ -61,7 +61,7 @@ func buildCommand(applyableInfo CommandInfo) {
 				log.Fatalf("error: %v", err)
 			}
 
-			b, err := yaml.Marshal([]map[string]interface{}{map[string]interface{}{applyableInfo.Name: data}})
+			b, err := yaml.Marshal([]map[string]interface{}{map[string]interface{}{actionInfo.Name: data}})
 			if err != nil {
 				log.Fatalf("error: %v", err)
 			}
@@ -101,20 +101,20 @@ func buildCommand(applyableInfo CommandInfo) {
 
 type CommandInfo struct {
 	Name        string
-	Applyable   applyables.Applyable
+	Action      actions.Action
 	Description string
 }
 
 func init() {
 	commandInfos := []CommandInfo{
-		CommandInfo{Name: "aur", Applyable: applyables.Aur{}, Description: "Add an AUR package"},
-		CommandInfo{Name: "brew", Applyable: applyables.Brew{}, Description: "Add a Homebrew package"},
-		CommandInfo{Name: "pacman", Applyable: applyables.Pacman{}, Description: "Add a Pacman package"},
-		CommandInfo{Name: "directory", Applyable: applyables.Directory{}, Description: "Add a Directory"},
-		CommandInfo{Name: "group", Applyable: applyables.Group{}, Description: "Add a Group"},
-		CommandInfo{Name: "script", Applyable: applyables.Script{}, Description: "Add a Script"},
-		CommandInfo{Name: "service", Applyable: applyables.Service{}, Description: "Add a Service"},
-		CommandInfo{Name: "symlink", Applyable: applyables.Symlink{}, Description: "Add a Symlink"},
+		CommandInfo{Name: "aur", Action: actions.Aur{}, Description: "Add an AUR package"},
+		CommandInfo{Name: "brew", Action: actions.Brew{}, Description: "Add a Homebrew package"},
+		CommandInfo{Name: "pacman", Action: actions.Pacman{}, Description: "Add a Pacman package"},
+		CommandInfo{Name: "directory", Action: actions.Directory{}, Description: "Add a Directory"},
+		CommandInfo{Name: "group", Action: actions.Group{}, Description: "Add a Group"},
+		CommandInfo{Name: "script", Action: actions.Script{}, Description: "Add a Script"},
+		CommandInfo{Name: "service", Action: actions.Service{}, Description: "Add a Service"},
+		CommandInfo{Name: "symlink", Action: actions.Symlink{}, Description: "Add a Symlink"},
 	}
 
 	for _, i := range commandInfos {
