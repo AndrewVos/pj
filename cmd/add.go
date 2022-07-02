@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 )
@@ -72,6 +73,16 @@ func buildCommand(action actions.Action) *cobra.Command {
 				log.Fatalf("error: %v", err)
 			}
 		},
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) != 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			moduleNames, err := getModuleNames()
+			if err != nil {
+				panic(err)
+			}
+			return moduleNames, cobra.ShellCompDirectiveNoFileComp
+		},
 	}
 
 	for i := 0; i < value.NumField(); i++ {
@@ -103,6 +114,14 @@ func buildCommand(action actions.Action) *cobra.Command {
 	command.Flags().SortFlags = false
 
 	return command
+}
+
+func getModuleNames() ([]string, error) {
+	files, err := filepath.Glob(path.Join("modules", "*"))
+	for i := range files {
+		files[i] = path.Base(files[i])
+	}
+	return files, err
 }
 
 func init() {
