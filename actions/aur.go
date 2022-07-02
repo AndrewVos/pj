@@ -8,7 +8,7 @@ import (
 )
 
 type Aur struct {
-	Name []string
+	Name []string `flag:"required"`
 }
 
 func init() {

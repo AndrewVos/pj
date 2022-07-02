@@ -13,11 +13,11 @@ import (
 	"strings"
 )
 
-func buildCommand(action actions.Action) {
+func buildCommand(action actions.Action) *cobra.Command {
 	value := reflect.Indirect(reflect.ValueOf(action))
 
 	var command = &cobra.Command{
-		Use:   "add-" + action.Flag() + " <module_name>",
+		Use:   action.Flag() + " <module_name>",
 		Short: action.AddActionDescription(),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
@@ -76,6 +76,7 @@ func buildCommand(action actions.Action) {
 
 	for i := 0; i < value.NumField(); i++ {
 		originalFieldName := value.Type().Field(i).Name
+		tag := value.Type().Field(i).Tag
 		fieldName := strings.ToLower(originalFieldName)
 		field := value.FieldByName(originalFieldName)
 
@@ -92,16 +93,27 @@ func buildCommand(action actions.Action) {
 			} else {
 				log.Fatalf("unsupported flag field type %v\n", kind)
 			}
+
+			if tag == "flag:\"required\"" {
+				command.MarkFlagRequired(fieldName)
+			}
 		}
 	}
 
 	command.Flags().SortFlags = false
 
-	rootCmd.AddCommand(command)
+	return command
 }
 
 func init() {
-	for _, action := range actions.All {
-		buildCommand(action)
+	var addCmd = &cobra.Command{
+		Use:   "add",
+		Short: "Add an action",
+		Args:  cobra.ExactArgs(1),
 	}
+
+	for _, action := range actions.All {
+		addCmd.AddCommand(buildCommand(action))
+	}
+	rootCmd.AddCommand(addCmd)
 }

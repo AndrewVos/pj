@@ -7,7 +7,7 @@ import (
 )
 
 type Service struct {
-	Name   string
+	Name   string `flag:"required"`
 	User   bool
 	Enable bool
 	Start  bool

@@ -8,7 +8,7 @@ import (
 
 type Directory struct {
 	Sudo bool
-	Path string
+	Path string `flag:"required"`
 }
 
 func init() {

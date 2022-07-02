@@ -12,8 +12,8 @@ import (
 
 type Symlink struct {
 	Sudo bool
-	From string
-	To   string
+	From string `flag:"required"`
+	To   string `flag:"required"`
 }
 
 func init() {

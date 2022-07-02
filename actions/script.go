@@ -6,7 +6,7 @@ import (
 )
 
 type Script struct {
-	Command string
+	Command string `flag:"required"`
 }
 
 func init() {

@@ -8,8 +8,8 @@ import (
 )
 
 type Group struct {
-	User string
-	Name string
+	User string `flag:"required"`
+	Name string `flag:"required"`
 }
 
 func init() {
