@@ -23,7 +23,7 @@ func (a Brew) AddActionDescription() string {
 	return "Add a Homebrew package"
 }
 
-func (p Brew) Apply() error {
+func (p Brew) Apply(modulePath string) error {
 	missing := []string{}
 
 	installed, err := utils.ListInstalledBrews()

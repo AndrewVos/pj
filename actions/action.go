@@ -3,7 +3,7 @@ package actions
 type Action interface {
 	Flag() string
 	AddActionDescription() string
-	Apply() error
+	Apply(modulePath string) error
 }
 
 var All []Action

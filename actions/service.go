@@ -25,7 +25,7 @@ func (a Service) AddActionDescription() string {
 	return "Add a Service"
 }
 
-func (s Service) Apply() error {
+func (s Service) Apply(modulePath string) error {
 	if s.Enable {
 		enabled, err := s.IsEnabled()
 		if err != nil {

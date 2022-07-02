@@ -21,7 +21,7 @@ func (a Script) AddActionDescription() string {
 	return "Add a Script"
 }
 
-func (s Script) Apply() error {
+func (s Script) Apply(modulePath string) error {
 	cmd := exec.Command("bash", "-c", s.Command)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

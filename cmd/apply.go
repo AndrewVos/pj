@@ -45,6 +45,7 @@ func apply() error {
 
 	type Module struct {
 		Name    string
+		Path    string
 		Actions []actions.Action
 	}
 
@@ -52,7 +53,7 @@ func apply() error {
 	actionCount := 0
 
 	for _, modulePath := range modulePaths {
-		m := Module{Name: path.Base(modulePath)}
+		m := Module{Name: path.Base(modulePath), Path: modulePath}
 
 		configurationPath := filepath.Join(modulePath, "configuration.yml")
 
@@ -84,7 +85,7 @@ func apply() error {
 			fmt.Printf("Applying module %s...\n", m.Name)
 		}
 		for _, action := range m.Actions {
-			err = action.Apply()
+			err = action.Apply(m.Path)
 			if err != nil {
 				return err
 			}
@@ -94,49 +95,32 @@ func apply() error {
 	return err
 }
 
+func findActionFor(topLevelModule map[string]map[string]interface{}) (actions.Action, map[string]interface{}) {
+	for _, action := range actions.All {
+		if data, ok := topLevelModule[action.Flag()]; ok {
+			return action, data
+		}
+	}
+	panic("action not found")
+}
+
 func decodeAction(modulePath string, topLevelModule map[string]map[string]interface{}) (actions.Action, error) {
-	if data, ok := topLevelModule["directory"]; ok {
-		var action actions.Directory
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["symlink"]; ok {
-		action := actions.NewSymlink(modulePath)
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["group"]; ok {
-		var action actions.Group
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["script"]; ok {
-		var action actions.Script
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["service"]; ok {
-		var action actions.Service
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["pacman"]; ok {
-		var action actions.Pacman
+	action, data := findActionFor(topLevelModule)
+
+	if _, ok := action.(actions.Pacman); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["aur"]; ok {
-		var action actions.Aur
+	} else if _, ok := action.(actions.Aur); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &action)
-		return action, err
-	} else if data, ok := topLevelModule["brew"]; ok {
-		var action actions.Brew
+	} else if _, ok := action.(actions.Brew); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-		err := mapstructure.Decode(data, &action)
-		return action, err
 	}
 
-	return nil, nil
+	err := mapstructure.Decode(data, &action)
+	return action, err
 }

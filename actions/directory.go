@@ -23,7 +23,7 @@ func (a Directory) AddActionDescription() string {
 	return "Add a Directory"
 }
 
-func (d Directory) Apply() error {
+func (d Directory) Apply(modulePath string) error {
 	fullPath := utils.ExpandTilde(d.Path)
 
 	isDirectory, err := utils.DirectoryExists(fullPath)

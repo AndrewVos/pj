@@ -23,7 +23,7 @@ func (a Aur) AddActionDescription() string {
 	return "Add an AUR package"
 }
 
-func (a Aur) Apply() error {
+func (a Aur) Apply(modulePath string) error {
 	missing := []string{}
 	installed, err := utils.ListInstalledPackages()
 

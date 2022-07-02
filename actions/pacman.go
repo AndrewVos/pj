@@ -23,7 +23,7 @@ func (a Pacman) AddActionDescription() string {
 	return "Add a Pacman package"
 }
 
-func (p Pacman) Apply() error {
+func (p Pacman) Apply(modulePath string) error {
 	missing := []string{}
 
 	installed, err := utils.ListInstalledPackages()

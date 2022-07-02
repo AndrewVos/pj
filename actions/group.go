@@ -24,7 +24,7 @@ func (a Group) AddActionDescription() string {
 	return "Add a Group"
 }
 
-func (g Group) Apply() error {
+func (g Group) Apply(modulePath string) error {
 	usr, err := user.Lookup(g.User)
 
 	if err != nil {
