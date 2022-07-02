@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/AndrewVos/pj/actions"
 	"github.com/AndrewVos/pj/utils"
+	"github.com/fatih/structtag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
@@ -105,8 +106,21 @@ func buildCommand(action actions.Action) *cobra.Command {
 				log.Fatalf("unsupported flag field type %v\n", kind)
 			}
 
-			if tag == "flag:\"required\"" {
-				command.MarkFlagRequired(fieldName)
+			tags, err := structtag.Parse(string(tag))
+			if err != nil {
+				panic(err)
+			}
+
+			flagTag, err := tags.Get("flag")
+			if err == nil {
+				if flagTag.Name == "required" {
+					command.MarkFlagRequired(fieldName)
+				}
+			}
+
+			completionTag, err := tags.Get("completion")
+			if err == nil {
+				command.RegisterFlagCompletionFunc(fieldName, completionFunc(action, completionTag.Name))
 			}
 		}
 	}
@@ -114,6 +128,16 @@ func buildCommand(action actions.Action) *cobra.Command {
 	command.Flags().SortFlags = false
 
 	return command
+}
+
+func completionFunc(action actions.Action, name string) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		completions, err := action.Completions(name)
+		if err != nil {
+			panic(err)
+		}
+		return completions, cobra.ShellCompDirectiveDefault
+	}
 }
 
 func getModuleNames() ([]string, error) {

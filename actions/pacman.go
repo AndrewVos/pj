@@ -8,7 +8,7 @@ import (
 )
 
 type Pacman struct {
-	Name []string `flag:"required"`
+	Name []string `flag:"required" completion:"pacman-packages"`
 }
 
 func init() {
@@ -21,6 +21,15 @@ func (a Pacman) Flag() string {
 
 func (a Pacman) AddActionDescription() string {
 	return "Add a Pacman package"
+}
+
+func (a Pacman) Completions(name string) ([]string, error) {
+	if name == "pacman-packages" {
+		var results []string
+		results, err := utils.ListPacmanPackages()
+		return results, err
+	}
+	return []string{}, nil
 }
 
 func (p Pacman) Apply(modulePath string) error {

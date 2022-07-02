@@ -21,6 +21,10 @@ func (a Script) AddActionDescription() string {
 	return "Add a Script"
 }
 
+func (a Script) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (s Script) Apply(modulePath string) error {
 	cmd := exec.Command("bash", "-c", s.Command)
 	cmd.Stdin = os.Stdin

@@ -23,6 +23,10 @@ func (a Brew) AddActionDescription() string {
 	return "Add a Homebrew package"
 }
 
+func (a Brew) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (p Brew) Apply(modulePath string) error {
 	missing := []string{}
 

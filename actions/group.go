@@ -24,6 +24,10 @@ func (a Group) AddActionDescription() string {
 	return "Add a Group"
 }
 
+func (a Group) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (g Group) Apply(modulePath string) error {
 	usr, err := user.Lookup(g.User)
 

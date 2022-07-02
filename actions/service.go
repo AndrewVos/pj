@@ -25,6 +25,10 @@ func (a Service) AddActionDescription() string {
 	return "Add a Service"
 }
 
+func (a Service) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (s Service) Apply(modulePath string) error {
 	if s.Enable {
 		enabled, err := s.IsEnabled()

@@ -28,6 +28,10 @@ func (a Symlink) AddActionDescription() string {
 	return "Add a Symlink"
 }
 
+func (a Symlink) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (s Symlink) Apply(modulePath string) error {
 	fullFrom := utils.ExpandTilde(s.From)
 	fullTo, err := filepath.Abs(filepath.Join(modulePath, "files", s.To))

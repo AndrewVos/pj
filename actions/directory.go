@@ -23,6 +23,10 @@ func (a Directory) AddActionDescription() string {
 	return "Add a Directory"
 }
 
+func (a Directory) Completions(fieldName string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (d Directory) Apply(modulePath string) error {
 	fullPath := utils.ExpandTilde(d.Path)
 
