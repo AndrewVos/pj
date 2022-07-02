@@ -36,8 +36,6 @@ func buildCommand(action actions.Action) *cobra.Command {
 						kind := field.Kind().String()
 
 						if f.Name == fieldName {
-							data[f.Name] = fieldValue
-
 							if _, ok := fieldValue.(string); ok {
 								s, _ := cmd.Flags().GetString(fieldName)
 								data[f.Name] = s
