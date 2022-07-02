@@ -11,6 +11,18 @@ type Brew struct {
 	Name []string
 }
 
+func init() {
+	RegisterAction(Brew{})
+}
+
+func (a Brew) Flag() string {
+	return "brew"
+}
+
+func (a Brew) AddActionDescription() string {
+	return "Add a Homebrew package"
+}
+
 func (p Brew) Apply() error {
 	missing := []string{}
 

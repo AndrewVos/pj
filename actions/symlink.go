@@ -17,6 +17,18 @@ type Symlink struct {
 	To         string
 }
 
+func init() {
+	RegisterAction(Symlink{})
+}
+
+func (a Symlink) Flag() string {
+	return "symlink"
+}
+
+func (a Symlink) AddActionDescription() string {
+	return "Add a Symlink"
+}
+
 func NewSymlink(modulePath string) Symlink {
 	return Symlink{modulePath: modulePath}
 }

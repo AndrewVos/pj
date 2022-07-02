@@ -11,6 +11,18 @@ type Pacman struct {
 	Name []string
 }
 
+func init() {
+	RegisterAction(Pacman{})
+}
+
+func (a Pacman) Flag() string {
+	return "pacman"
+}
+
+func (a Pacman) AddActionDescription() string {
+	return "Add a Pacman package"
+}
+
 func (p Pacman) Apply() error {
 	missing := []string{}
 

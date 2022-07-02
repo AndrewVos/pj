@@ -13,11 +13,12 @@ import (
 	"strings"
 )
 
-func buildCommand(actionInfo CommandInfo) {
-	value := reflect.Indirect(reflect.ValueOf(actionInfo.Action))
+func buildCommand(action actions.Action) {
+	value := reflect.Indirect(reflect.ValueOf(action))
+
 	var command = &cobra.Command{
-		Use:   "add-" + actionInfo.Name + " <module_name>",
-		Short: actionInfo.Description,
+		Use:   "add-" + action.Flag() + " <module_name>",
+		Short: action.AddActionDescription(),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			data := map[string]interface{}{}
@@ -61,7 +62,7 @@ func buildCommand(actionInfo CommandInfo) {
 				log.Fatalf("error: %v", err)
 			}
 
-			b, err := yaml.Marshal([]map[string]interface{}{map[string]interface{}{actionInfo.Name: data}})
+			b, err := yaml.Marshal([]map[string]interface{}{map[string]interface{}{action.Flag(): data}})
 			if err != nil {
 				log.Fatalf("error: %v", err)
 			}
@@ -99,25 +100,8 @@ func buildCommand(actionInfo CommandInfo) {
 	rootCmd.AddCommand(command)
 }
 
-type CommandInfo struct {
-	Name        string
-	Action      actions.Action
-	Description string
-}
-
 func init() {
-	commandInfos := []CommandInfo{
-		CommandInfo{Name: "aur", Action: actions.Aur{}, Description: "Add an AUR package"},
-		CommandInfo{Name: "brew", Action: actions.Brew{}, Description: "Add a Homebrew package"},
-		CommandInfo{Name: "pacman", Action: actions.Pacman{}, Description: "Add a Pacman package"},
-		CommandInfo{Name: "directory", Action: actions.Directory{}, Description: "Add a Directory"},
-		CommandInfo{Name: "group", Action: actions.Group{}, Description: "Add a Group"},
-		CommandInfo{Name: "script", Action: actions.Script{}, Description: "Add a Script"},
-		CommandInfo{Name: "service", Action: actions.Service{}, Description: "Add a Service"},
-		CommandInfo{Name: "symlink", Action: actions.Symlink{}, Description: "Add a Symlink"},
-	}
-
-	for _, i := range commandInfos {
-		buildCommand(i)
+	for _, action := range actions.All {
+		buildCommand(action)
 	}
 }

@@ -11,6 +11,18 @@ type Aur struct {
 	Name []string
 }
 
+func init() {
+	RegisterAction(Aur{})
+}
+
+func (a Aur) Flag() string {
+	return "aur"
+}
+
+func (a Aur) AddActionDescription() string {
+	return "Add an AUR package"
+}
+
 func (a Aur) Apply() error {
 	missing := []string{}
 	installed, err := utils.ListInstalledPackages()

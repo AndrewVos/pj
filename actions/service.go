@@ -13,6 +13,18 @@ type Service struct {
 	Start  bool
 }
 
+func init() {
+	RegisterAction(Service{})
+}
+
+func (a Service) Flag() string {
+	return "service"
+}
+
+func (a Service) AddActionDescription() string {
+	return "Add a Service"
+}
+
 func (s Service) Apply() error {
 	if s.Enable {
 		enabled, err := s.IsEnabled()

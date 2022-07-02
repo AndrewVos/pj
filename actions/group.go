@@ -12,6 +12,18 @@ type Group struct {
 	Name string
 }
 
+func init() {
+	RegisterAction(Group{})
+}
+
+func (a Group) Flag() string {
+	return "group"
+}
+
+func (a Group) AddActionDescription() string {
+	return "Add a Group"
+}
+
 func (g Group) Apply() error {
 	usr, err := user.Lookup(g.User)
 

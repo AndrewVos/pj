@@ -11,6 +11,18 @@ type Directory struct {
 	Path string
 }
 
+func init() {
+	RegisterAction(Directory{})
+}
+
+func (a Directory) Flag() string {
+	return "directory"
+}
+
+func (a Directory) AddActionDescription() string {
+	return "Add a Directory"
+}
+
 func (d Directory) Apply() error {
 	fullPath := utils.ExpandTilde(d.Path)
 
