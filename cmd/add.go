@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/AndrewVos/pj/actions"
+	"github.com/AndrewVos/pj/modules"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/fatih/structtag"
 	"github.com/spf13/cobra"
@@ -10,7 +11,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 	"reflect"
 	"strings"
 )
@@ -76,7 +76,7 @@ func buildCommand(action actions.Action) *cobra.Command {
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			if len(args) != 0 {
-				return nil, cobra.ShellCompDirectiveNoFileComp
+				return nil, cobra.ShellCompDirectiveDefault
 			}
 			moduleNames, err := getModuleNames()
 			if err != nil {
@@ -141,18 +141,23 @@ func completionFunc(action actions.Action, name string) func(cmd *cobra.Command,
 }
 
 func getModuleNames() ([]string, error) {
-	files, err := filepath.Glob(path.Join("modules", "*"))
-	for i := range files {
-		files[i] = path.Base(files[i])
+	var names []string
+
+	modules, err := modules.LoadModules()
+	if err != nil {
+		return names, err
 	}
-	return files, err
+
+	for _, m := range modules {
+		names = append(names, m.Name)
+	}
+	return names, err
 }
 
 func init() {
 	var addCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add an action",
-		Args:  cobra.ExactArgs(1),
 	}
 
 	for _, action := range actions.All {

@@ -9,8 +9,13 @@ import (
 )
 
 func FileExists(path string) bool {
-	_, err := os.Stat(path)
-	return errors.Is(err, os.ErrExist)
+	if _, err := os.Stat(path); err == nil {
+		return true
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false
+	} else {
+		return false
+	}
 }
 
 func ExpandTilde(path string) string {

@@ -26,15 +26,36 @@ func (m Module) Apply() error {
 	return nil
 }
 
-func LoadModules() ([]Module, error) {
-	var modules []Module
+func modulePaths() ([]string, error) {
+	var modulePaths []string
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		return modules, err
+		return modulePaths, err
 	}
 
-	modulePaths, err := filepath.Glob(filepath.Join(cwd, "modules", "*"))
+	paths, err := filepath.Glob(filepath.Join(cwd, "modules", "*"))
+	if err != nil {
+		return modulePaths, err
+	}
+
+	for _, path := range paths {
+		exists, err := utils.DirectoryExists(path)
+		if err != nil {
+			return modulePaths, err
+		}
+
+		if exists {
+			modulePaths = append(modulePaths, path)
+		}
+	}
+	return modulePaths, nil
+}
+
+func LoadModules() ([]Module, error) {
+	var modules []Module
+
+	modulePaths, err := modulePaths()
 	if err != nil {
 		return modules, err
 	}
@@ -44,23 +65,25 @@ func LoadModules() ([]Module, error) {
 
 		configurationPath := filepath.Join(modulePath, "configuration.yml")
 
-		contents, err := utils.ReadFile(configurationPath)
-		if err != nil {
-			return modules, err
-		}
-
-		document := []map[string]map[string]interface{}{}
-		err = yaml.Unmarshal([]byte(contents), &document)
-		if err != nil {
-			return modules, err
-		}
-
-		for _, topLevelModule := range document {
-			action, err := decodeAction(modulePath, topLevelModule)
+		if utils.FileExists(configurationPath) {
+			contents, err := utils.ReadFile(configurationPath)
 			if err != nil {
 				return modules, err
 			}
-			m.Actions = append(m.Actions, action)
+
+			document := []map[string]map[string]interface{}{}
+			err = yaml.Unmarshal([]byte(contents), &document)
+			if err != nil {
+				return modules, err
+			}
+
+			for _, topLevelModule := range document {
+				action, err := decodeAction(modulePath, topLevelModule)
+				if err != nil {
+					return modules, err
+				}
+				m.Actions = append(m.Actions, action)
+			}
 		}
 
 		modules = append(modules, m)
