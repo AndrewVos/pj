@@ -4,17 +4,19 @@ IFS=$'\n\t'
 
 cd /tmp
 
-curl -s https://api.github.com/repos/AndrewVos/pj/releases/latest \
-  | grep "browser_download_url.*.tar.gz" \
-  | grep -v "md5" \
-  | cut -d : -f 2,3 \
-  | tr -d \" \
-  | wget -qi -
+echo "Finding latest release..."
+TAG=$(git ls-remote --tags --exit-code --refs https://github.com/AndrewVos/pj.git | sed -E 's/^[[:xdigit:]]+[[:space:]]+refs\/tags\/(.+)/\1/g' | tail -n1)
+RELEASE_URL="https://github.com/AndrewVos/pj/releases/download/$TAG/pj-$TAG-linux-amd64.tar.gz"
 
-tar -zxvf pj-*.tar.gz
+echo "Downloading $RELEASE_URL..."
+wget "$RELEASE_URL" --output-document pj.tar.gz --quiet
 
+echo "Extracting..."
+tar -zxvf pj.tar.gz > /dev/null
+
+echo "Installing binary..."
 if [[ -d /usr/local/bin ]]; then
   sudo mv pj /usr/local/bin/pj
 fi
 
-cd -
+cd - > /dev/null
