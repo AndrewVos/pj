@@ -23,6 +23,18 @@ With golang:
 go install github.com/AndrewVos/pj@latest
 ```
 
+If you're using `fish` shell add the following to your `config.fish`:
+
+```
+pj completion fish | source
+```
+
+If you're using `bash` add the following to your `.bashrc`:
+
+```
+source <(pj completion bash)
+```
+
 ## Configuration
 
 We use the concept of "modules" in `pj`.
@@ -200,22 +212,4 @@ Symlink a file or directory with sudo:
     sudo: true
     from: "/etc/blah"
     to: "blah"
-```
-
-## Shell completions
-
-### Fish
-
-Add the following to your `config.fish`:
-
-```
-  pj completion fish | source
-```
-
-### Bash
-
-Add the following to your `.bashrc`:
-
-```
-source <(pj completion bash)
 ```
