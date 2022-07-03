@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
+cd /tmp
+
+curl -s https://api.github.com/repos/AndrewVos/pj/releases/latest \
+  | grep "browser_download_url.*.tar.gz" \
+  | grep -v "md5" \
+  | cut -d : -f 2,3 \
+  | tr -d \" \
+  | wget -qi -
+
+tar -zxvf pj-*.tar.gz
+
+if [[ -d /usr/local/bin ]]; then
+  sudo mv pj /usr/local/bin/pj
+fi
+
+cd -

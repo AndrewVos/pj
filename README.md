@@ -11,6 +11,14 @@ which means that packages will only get installed once, symlinks will only be cr
 
 ## Installation
 
+Binary:
+
+```
+wget -O - https://raw.githubusercontent.com/AndrewVos/pj/main/install-from-github | bash
+```
+
+With golang:
+
 ```
 go install github.com/AndrewVos/pj@latest
 ```
