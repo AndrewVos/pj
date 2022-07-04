@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"errors"
@@ -17,14 +17,14 @@ type Symlink struct {
 }
 
 func init() {
-	RegisterAction(Symlink{})
+	RegisterTask(Symlink{})
 }
 
 func (a Symlink) Flag() string {
 	return "symlink"
 }
 
-func (a Symlink) AddActionDescription() string {
+func (a Symlink) AddTaskDescription() string {
 	return "Add a Symlink"
 }
 

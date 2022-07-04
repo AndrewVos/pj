@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"fmt"
@@ -14,14 +14,14 @@ type Service struct {
 }
 
 func init() {
-	RegisterAction(Service{})
+	RegisterTask(Service{})
 }
 
 func (a Service) Flag() string {
 	return "service"
 }
 
-func (a Service) AddActionDescription() string {
+func (a Service) AddTaskDescription() string {
 	return "Add a Service"
 }
 

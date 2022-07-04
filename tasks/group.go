@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"fmt"
@@ -13,14 +13,14 @@ type Group struct {
 }
 
 func init() {
-	RegisterAction(Group{})
+	RegisterTask(Group{})
 }
 
 func (a Group) Flag() string {
 	return "group"
 }
 
-func (a Group) AddActionDescription() string {
+func (a Group) AddTaskDescription() string {
 	return "Add a Group"
 }
 

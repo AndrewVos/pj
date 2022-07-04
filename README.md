@@ -2,12 +2,20 @@
 
 ![pj](bird.png)
 
-Configuration management for localhost
+dotfiles configuration management for your machine
 
-## What is this?
+## About
 
-When you run ```pj apply``` we sync your configuration to your system,
-which means that packages will only get installed once, symlinks will only be created once etc.
+`pj` is a tool to help streamline the configuration of your local machine. It
+allows you to:
+
+- Install packages from Homebrew, Pacman or AUR
+- Symlink files to your home directory (or any directory!)
+- Start and stop services
+- Run scripts
+- Create files and directories
+
+Everything is controlled by YAML configuration which keeps your concerns separate and easy to manage.
 
 ## Installation
 
@@ -35,181 +43,189 @@ If you're using `bash` add the following to your `.bashrc`:
 source <(pj completion bash)
 ```
 
-## Configuration
-
-We use the concept of "modules" in `pj`.
-
-A module can be thought of as a group of configuration and files.
-
-Imagine a module called `vim`, with a file structure that looks like:
+## Quick start
 
 ```
-modules/
-└── vim
-    ├── configuration.yml
-        └── files
-                └── .vimrc
-```
+# Create some dotfiles
+mkdir dotfiles
+cd dotfiles
+git init
 
-And in `configuration.yml` we have:
+# Use a task generator to add a symlink from ~/.vimrc to the .vimrc in your dotfiles
+pj add symlink module-name --from ~/.vimrc --to .vimrc
+touch module/module-name/files/.vimrc
 
-```
-- pacman:
-    name: vim
-
-- symlink:
-    from: "~/.vimrc"
-    to: ".vimrc"
-```
-
-This is just a yml file (and you may notice it's pretty much the same as Ansible).
-
-The first part installs a pacman package called `vim`.
-
-The second part symlinks `~/.vimrc` to the `.vimrc` in your `modules/vim/files/.vimrc`.
-
-Notice that `pj` understands paths relative to your `files` directory inside the module.
-
-Now when you run `pj apply` we will install `vim` and symlink your `.vimrc` to the correct place.
-
-For more examples [take a look at my personal dotfiles repo](https://github.com/AndrewVos/dotfiles).
-
-## Usage
-
-```
-pj create-module my-module
+# Apply!
 pj apply
 ```
 
-## Supported objects
+For some more examples [take a look at my personal dotfiles repo](https://github.com/AndrewVos/dotfiles).
 
-### Pacman packages
+## Task generators
 
-Install a single package:
+### AUR package
 
-```yaml
-- pacman:
-    name: imv
+```bash
+pj add aur module-name --name package1 --name package2
 ```
 
-Install multiple packages:
-
-```yaml
-- pacman:
-    name:
-      - mpv
-      - redis
+```
+./modules/module-name/configuration.yml
 ```
 
-### Arch User Repository packages
+```yml
 
-Install a single package:
-
-```yaml
-- aur:
-    name: enpass-bin
-```
-
-Install multiple packages:
-
-```yaml
+tasks:
 - aur:
     name:
-      - enpass-bin
-      - google-chrome
-      - spotify
-      - colorpicker
-      - slack-desktop
+    - package1
+    - package2
 ```
 
-### Brew packages
+### Homebrew package
 
-Install a single package:
-
-```yaml
-- brew:
-    name: postgresql
+```bash
+pj add brew module-name --name package1 --name package2
 ```
 
-Install multiple packages:
+```
+./modules/module-name/configuration.yml
+```
 
-```yaml
+```yml
+
+tasks:
 - brew:
     name:
-      - postgresql
-      - chrome
+    - package1
+    - package2
+```
+
+### Pacman package
+
+```bash
+pj add pacman module-name --name package1 --name package2
+```
+
+```
+./modules/module-name/configuration.yml
+```
+
+```yml
+
+tasks:
+- pacman:
+    name:
+    - package1
+    - package2
 ```
 
 ### Directory
 
-Create a directory:
-
-```yaml
-- directory:
-    path: "~/.my-directory"
+```bash
+pj add directory module-name --path /some/path
 ```
 
-Create a directory with sudo:
+```
+./modules/module-name/configuration.yml
+```
 
-```yaml
+```yml
+
+tasks:
 - directory:
+    path: /some/path
+```
+
+### Directory
+
+```bash
+pj add directory module-name --path /some/path --sudo
+```
+
+```
+./modules/module-name/configuration.yml
+```
+
+```yml
+
+tasks:
+- directory:
+    path: /some/path
     sudo: true
-    path: "/etc/blah"
 ```
 
 ### Group
 
-Add a user to a group:
+```bash
+pj add group module-name --user some-user --name group-name
+```
 
-```yaml
+```
+./modules/module-name/configuration.yml
+```
+
+```yml
+
+tasks:
 - group:
-    user: vos
-    name: power
+    name: group-name
+    user: some-user
 ```
 
 ### Script
 
-Run a script:
+```bash
+pj add script module-name --command ls -a
+```
 
-```yaml
+```
+./modules/module-name/configuration.yml
+```
+
+```yml
+
+tasks:
 - script:
-    command: '[[ "$SHELL" = /usr/bin/fish ]] || sudo usermod --shell /usr/bin/fish "$USER"'
+    command: ls -a
 ```
 
 ### Service
 
-Start a service:
-
-```yaml
-- service:
-    name: "sshd"
-    start: true
+```bash
+pj add service module-name --name service-name --start --enable
 ```
 
-Start and enable a service:
+```
+./modules/module-name/configuration.yml
+```
 
-```yaml
+```yml
+
+tasks:
 - service:
-    name: "sshd"
     enable: true
+    name: service-name
     start: true
 ```
 
 ### Symlink
 
-Symlink a file or directory:
-
-```yaml
-- symlink:
-    from: "~/.ssh"
-    to: ".ssh"
+```bash
+pj add symlink module-name --from /blah/blah --to blah --sudo
 ```
 
-Symlink a file or directory with sudo:
+```
+./modules/module-name/configuration.yml
+```
 
-```yaml
+```yml
+
+tasks:
 - symlink:
+    from: /blah/blah
     sudo: true
-    from: "/etc/blah"
-    to: "blah"
+    to: blah
 ```
+
+

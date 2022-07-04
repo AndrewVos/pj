@@ -20,3 +20,14 @@ func AppendToFile(path string, contents string) error {
 	_, err = f.WriteString(contents)
 	return err
 }
+
+func WriteFile(path string, contents string) error {
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(contents)
+	return err
+}

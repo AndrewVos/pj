@@ -4,11 +4,58 @@ IFS=$'\n\t'
 
 go build
 
-./pj add aur       module-name --name package1 --name package2
-./pj add brew      module-name --name package1 --name package2
-./pj add pacman    module-name --name package1 --name package2
-./pj add directory module-name --path /some/path --sudo
-./pj add group     module-name --user some-user --name group-name
-./pj add script    module-name --command "ls -a"
-./pj add service   module-name --name "service-name" --start --enable
-./pj add symlink   module-name --from "/blah/blah" --to blah
+project_directory=$(pwd)
+
+function pj() {
+  echo
+  echo '```bash'
+  echo "pj $@"
+  echo '```'
+
+  cd "$(mktemp -d)"
+  "$project_directory/pj" "$@"
+  echo
+
+  echo '```'
+  echo "./modules/module-name/configuration.yml"
+  echo '```'
+  echo
+
+  echo '```yml'
+  echo
+  cat modules/module-name/configuration.yml
+  echo '```'
+  echo
+
+  # echo '```'
+  # tree
+  # echo '```'
+  # echo
+}
+
+echo "### AUR package"
+pj add aur       module-name --name package1 --name package2
+
+echo "### Homebrew package"
+pj add brew      module-name --name package1 --name package2
+
+echo "### Pacman package"
+pj add pacman    module-name --name package1 --name package2
+
+echo "### Directory"
+pj add directory module-name --path /some/path
+
+echo "### Directory"
+pj add directory module-name --path /some/path --sudo
+
+echo "### Group"
+pj add group     module-name --user some-user --name group-name
+
+echo "### Script"
+pj add script    module-name --command "ls -a"
+
+echo "### Service"
+pj add service   module-name --name "service-name" --start --enable
+
+echo "### Symlink"
+pj add symlink   module-name --from "/blah/blah" --to blah --sudo

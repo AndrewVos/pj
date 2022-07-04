@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"os"
@@ -10,14 +10,14 @@ type Script struct {
 }
 
 func init() {
-	RegisterAction(Script{})
+	RegisterTask(Script{})
 }
 
 func (a Script) Flag() string {
 	return "script"
 }
 
-func (a Script) AddActionDescription() string {
+func (a Script) AddTaskDescription() string {
 	return "Add a Script"
 }
 

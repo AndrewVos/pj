@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"github.com/AndrewVos/pj/utils"
@@ -7,42 +7,42 @@ import (
 	"os/exec"
 )
 
-type Brew struct {
+type Aur struct {
 	Name []string `flag:"required"`
 }
 
 func init() {
-	RegisterAction(Brew{})
+	RegisterTask(Aur{})
 }
 
-func (a Brew) Flag() string {
-	return "brew"
+func (a Aur) Flag() string {
+	return "aur"
 }
 
-func (a Brew) AddActionDescription() string {
-	return "Add a Homebrew package"
+func (a Aur) AddTaskDescription() string {
+	return "Add an AUR package"
 }
 
-func (a Brew) Completions(fieldName string) ([]string, error) {
+func (a Aur) Completions(fieldName string) ([]string, error) {
 	return []string{}, nil
 }
 
-func (p Brew) Apply(modulePath string) error {
+func (a Aur) Apply(modulePath string) error {
 	missing := []string{}
+	installed, err := utils.ListInstalledPackages()
 
-	installed, err := utils.ListInstalledBrews()
 	if err != nil {
 		return err
 	}
 
-	for _, pkg := range p.Name {
+	for _, pkg := range a.Name {
 		if !slices.Contains(installed, pkg) {
 			missing = append(missing, pkg)
 		}
 	}
 
 	if len(missing) > 0 {
-		cmd := exec.Command("brew", append([]string{"install"}, missing...)...)
+		cmd := exec.Command("yay", append([]string{"-S"}, missing...)...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

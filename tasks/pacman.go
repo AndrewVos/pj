@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"github.com/AndrewVos/pj/utils"
@@ -12,14 +12,14 @@ type Pacman struct {
 }
 
 func init() {
-	RegisterAction(Pacman{})
+	RegisterTask(Pacman{})
 }
 
 func (a Pacman) Flag() string {
 	return "pacman"
 }
 
-func (a Pacman) AddActionDescription() string {
+func (a Pacman) AddTaskDescription() string {
 	return "Add a Pacman package"
 }
 

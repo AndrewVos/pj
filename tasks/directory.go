@@ -1,4 +1,4 @@
-package actions
+package tasks
 
 import (
 	"github.com/AndrewVos/pj/utils"
@@ -12,14 +12,14 @@ type Directory struct {
 }
 
 func init() {
-	RegisterAction(Directory{})
+	RegisterTask(Directory{})
 }
 
 func (a Directory) Flag() string {
 	return "directory"
 }
 
-func (a Directory) AddActionDescription() string {
+func (a Directory) AddTaskDescription() string {
 	return "Add a Directory"
 }
 

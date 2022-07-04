@@ -1,26 +1,22 @@
 package cmd
 
 import (
-	"github.com/AndrewVos/pj/actions"
 	"github.com/AndrewVos/pj/modules"
-	"github.com/AndrewVos/pj/utils"
+	"github.com/AndrewVos/pj/tasks"
 	"github.com/fatih/structtag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"gopkg.in/yaml.v2"
 	"log"
-	"os"
-	"path"
 	"reflect"
 	"strings"
 )
 
-func buildCommand(action actions.Action) *cobra.Command {
-	value := reflect.Indirect(reflect.ValueOf(action))
+func buildCommand(task tasks.Task) *cobra.Command {
+	value := reflect.Indirect(reflect.ValueOf(task))
 
 	var command = &cobra.Command{
-		Use:   action.Flag() + " <module_name>",
-		Short: action.AddActionDescription(),
+		Use:   task.Flag() + " <module_name>",
+		Short: task.AddTaskDescription(),
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			data := map[string]interface{}{}
@@ -54,20 +50,7 @@ func buildCommand(action actions.Action) *cobra.Command {
 			})
 
 			moduleName := args[0]
-			modulePath := path.Join("modules", moduleName)
-			configurationPath := path.Join(modulePath, "configuration.yml")
-
-			err := os.MkdirAll(modulePath, 0777)
-			if err != nil {
-				log.Fatalf("error: %v", err)
-			}
-
-			b, err := yaml.Marshal([]map[string]interface{}{map[string]interface{}{action.Flag(): data}})
-			if err != nil {
-				log.Fatalf("error: %v", err)
-			}
-
-			err = utils.AppendToFile(configurationPath, string(b))
+			err := modules.AppendTask(moduleName, task.Flag(), data)
 			if err != nil {
 				log.Fatalf("error: %v", err)
 			}
@@ -118,7 +101,7 @@ func buildCommand(action actions.Action) *cobra.Command {
 
 			completionTag, err := tags.Get("completion")
 			if err == nil {
-				command.RegisterFlagCompletionFunc(fieldName, completionFunc(action, completionTag.Name))
+				command.RegisterFlagCompletionFunc(fieldName, completionFunc(task, completionTag.Name))
 			}
 		}
 	}
@@ -128,9 +111,9 @@ func buildCommand(action actions.Action) *cobra.Command {
 	return command
 }
 
-func completionFunc(action actions.Action, name string) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func completionFunc(task tasks.Task, name string) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		completions, err := action.Completions(name)
+		completions, err := task.Completions(name)
 		if err != nil {
 			panic(err)
 		}
@@ -155,11 +138,11 @@ func getModuleNames() ([]string, error) {
 func init() {
 	var addCmd = &cobra.Command{
 		Use:   "add",
-		Short: "Add an action",
+		Short: "Add a task",
 	}
 
-	for _, action := range actions.All {
-		addCmd.AddCommand(buildCommand(action))
+	for _, task := range tasks.All {
+		addCmd.AddCommand(buildCommand(task))
 	}
 	rootCmd.AddCommand(addCmd)
 }

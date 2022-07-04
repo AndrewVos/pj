@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"github.com/AndrewVos/pj/actions"
+	"github.com/AndrewVos/pj/tasks"
 	"github.com/AndrewVos/pj/utils"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
@@ -11,14 +11,73 @@ import (
 )
 
 type Module struct {
-	Name    string
-	Path    string
-	Actions []actions.Action
+	Name string `yaml:"-"`
+	Path string `yaml:"-"`
+
+	Tasks []map[string]map[string]interface{}
+}
+
+func (m Module) Save() error {
+	err := os.MkdirAll(m.Path, 0777)
+	if err != nil {
+		return err
+	}
+
+	b, err := yaml.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return utils.WriteFile(path.Join(m.Path, "configuration.yml"), string(b))
+}
+
+func (m Module) AllTasks() ([]tasks.Task, error) {
+	var a []tasks.Task
+	for _, data := range m.Tasks {
+		task, err := decodeTask(m.Path, data)
+		if err != nil {
+			return a, err
+		}
+		a = append(a, task)
+	}
+	return a, nil
+}
+
+func AppendTask(moduleName string, name string, data map[string]interface{}) error {
+	modules, err := LoadModules()
+	if err != nil {
+		return err
+	}
+
+	for _, m := range modules {
+		if m.Name == moduleName {
+			err := m.AppendTask(name, data)
+			return err
+		}
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	m := Module{Name: moduleName, Path: filepath.Join(cwd, "modules", moduleName)}
+	err = m.AppendTask(name, data)
+	return err
+}
+
+func (m Module) AppendTask(name string, data map[string]interface{}) error {
+	m.Tasks = append(m.Tasks, map[string]map[string]interface{}{name: data})
+	return m.Save()
 }
 
 func (m Module) Apply() error {
-	for _, action := range m.Actions {
-		err := action.Apply(m.Path)
+	tasks, err := m.AllTasks()
+	if err != nil {
+		return err
+	}
+
+	for _, task := range tasks {
+		err := task.Apply(m.Path)
 		if err != nil {
 			return err
 		}
@@ -52,6 +111,25 @@ func modulePaths() ([]string, error) {
 	return modulePaths, nil
 }
 
+func LoadModule(modulePath string) (Module, error) {
+	m := Module{Name: path.Base(modulePath), Path: modulePath}
+
+	configurationPath := filepath.Join(modulePath, "configuration.yml")
+	if utils.FileExists(configurationPath) {
+		contents, err := utils.ReadFile(configurationPath)
+		if err != nil {
+			return m, err
+		}
+
+		err = yaml.Unmarshal([]byte(contents), &m)
+		if err != nil {
+			return m, err
+		}
+	}
+
+	return m, nil
+}
+
 func LoadModules() ([]Module, error) {
 	var modules []Module
 
@@ -61,29 +139,9 @@ func LoadModules() ([]Module, error) {
 	}
 
 	for _, modulePath := range modulePaths {
-		m := Module{Name: path.Base(modulePath), Path: modulePath}
-
-		configurationPath := filepath.Join(modulePath, "configuration.yml")
-
-		if utils.FileExists(configurationPath) {
-			contents, err := utils.ReadFile(configurationPath)
-			if err != nil {
-				return modules, err
-			}
-
-			document := []map[string]map[string]interface{}{}
-			err = yaml.Unmarshal([]byte(contents), &document)
-			if err != nil {
-				return modules, err
-			}
-
-			for _, topLevelModule := range document {
-				action, err := decodeAction(modulePath, topLevelModule)
-				if err != nil {
-					return modules, err
-				}
-				m.Actions = append(m.Actions, action)
-			}
+		m, err := LoadModule(modulePath)
+		if err != nil {
+			return modules, err
 		}
 
 		modules = append(modules, m)
@@ -92,32 +150,32 @@ func LoadModules() ([]Module, error) {
 	return modules, nil
 }
 
-func findActionFor(topLevelModule map[string]map[string]interface{}) (actions.Action, map[string]interface{}) {
-	for _, action := range actions.All {
-		if data, ok := topLevelModule[action.Flag()]; ok {
-			return action, data
+func findTaskFor(topLevelModule map[string]map[string]interface{}) (tasks.Task, map[string]interface{}) {
+	for _, task := range tasks.All {
+		if data, ok := topLevelModule[task.Flag()]; ok {
+			return task, data
 		}
 	}
-	panic("action not found")
+	panic("task not found")
 }
 
-func decodeAction(modulePath string, topLevelModule map[string]map[string]interface{}) (actions.Action, error) {
-	action, data := findActionFor(topLevelModule)
+func decodeTask(modulePath string, topLevelModule map[string]map[string]interface{}) (tasks.Task, error) {
+	task, data := findTaskFor(topLevelModule)
 
-	if _, ok := action.(actions.Pacman); ok {
+	if _, ok := task.(tasks.Pacman); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-	} else if _, ok := action.(actions.Aur); ok {
+	} else if _, ok := task.(tasks.Aur); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
-	} else if _, ok := action.(actions.Brew); ok {
+	} else if _, ok := task.(tasks.Brew); ok {
 		if name, ok := data["name"].(string); ok {
 			data["name"] = []string{name}
 		}
 	}
 
-	err := mapstructure.Decode(data, &action)
-	return action, err
+	err := mapstructure.Decode(data, &task)
+	return task, err
 }

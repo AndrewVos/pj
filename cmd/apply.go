@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/AndrewVos/pj/modules"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var Verbose bool
@@ -12,11 +11,8 @@ var Verbose bool
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply the configuration",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := apply()
-		if err != nil {
-			log.Fatalf("error: %v", err)
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return apply()
 	},
 }
 
