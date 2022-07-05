@@ -1,8 +1,20 @@
 # pj
 
+dotfiles configuration management for your machine
+
 ![pj](bird.png)
 
-dotfiles configuration management for your machine
+Your dotfiles are yours - they describe you and are a part of your place on this planet.
+
+They should be beautiful, but they probably aren't right now. You've let them get a bit unorganised, haven't you?
+
+That's ok.
+
+We are here to tell you that your dotfiles can be magnificent once again!
+
+Take our hands and we will show you how to make them shine.
+
+Let's rekindle that love you once had.
 
 ## About
 
